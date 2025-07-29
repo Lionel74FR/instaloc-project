@@ -1,21 +1,15 @@
 // middleware.ts
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(request: NextRequest) {
-  // 1. On récupère le cookie de session NextAuth
-  const token = request.cookies.get("next-auth.session-token");
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
-  // 2. Si pas de token → on redirige vers l’accueil
-  if (!token) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (!token && req.nextUrl.pathname.startsWith("/create")) {
+    return NextResponse.redirect(new URL("/api/auth/signin", req.url));
   }
-
-  // 3. Sinon on laisse passer
-  return NextResponse.next();
 }
 
-// 4. On définit quelles routes protéger
 export const config = {
   matcher: ["/create", "/profile/:path*"],
 };
