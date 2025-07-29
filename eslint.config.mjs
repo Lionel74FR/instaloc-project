@@ -15,11 +15,11 @@ const eslintConfig = [
 
 export default eslintConfig;
 
-module.exports = {
+export default {
   rules: {
     '@typescript-eslint/no-require-imports': 'off',
-    '@typescript/no-unused-expressions': 'off',
-    '@typescript/no-empty-object-type': 'off',
-    '@typescript/no-this-alias': 'off'
-  }
+    '@typescript-eslint/no-unused-expressions': 'off',
+    '@typescript-eslint/no-empty-object-type': 'off',
+    '@typescript-eslint/no-this-alias': 'off',
+  },
 };
