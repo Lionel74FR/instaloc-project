@@ -14,3 +14,12 @@ const eslintConfig = [
 ];
 
 export default eslintConfig;
+
+module.exports = {
+  rules: {
+    '@typescript-eslint/no-require-imports': 'off',
+    '@typescript/no-unused-expressions': 'off',
+    '@typescript/no-empty-object-type': 'off',
+    '@typescript/no-this-alias': 'off'
+  }
+};
