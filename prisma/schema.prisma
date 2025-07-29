@@ -59,6 +59,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  password      String?   // 👈 pour les comptes classiques
   accounts      Account[]
   sessions      Session[]
   listings      Listing[] // relation 1-n avec les annonces

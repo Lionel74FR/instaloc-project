@@ -8,6 +8,12 @@ export function AuthButton() {
   return (
     <>
       <button
+  onClick={() => signIn("credentials", { email: "test@demo.fr", password: "123456" })}
+  className="btn btn-sm btn-secondary"
+>
+  Demo User
+</button>
+      <button
         onClick={() => signIn("google")}
         className="btn btn-sm btn-primary"
       >
