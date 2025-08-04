@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { UploadDropzone } from "@uploadthing/react";
 import Image from "next/image";
+import type { OurFileRouter } from "@/app/api/uploadthing/core";
 
 interface UploaderProps {
   onChange: (urls: string[]) => void;

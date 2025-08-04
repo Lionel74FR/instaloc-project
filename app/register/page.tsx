@@ -14,8 +14,7 @@ export default function RegisterPage() {
     e.preventDefault();
     const res = await fetch("/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, password, name: `${firstName} ${lastName}` }),
-    });
+      body: JSON.stringify({ email, password, firstName, lastName }),    });
     if (res.ok) {
       await signIn("credentials", { email, password, redirectTo: "/dashboard" });
     } else {
