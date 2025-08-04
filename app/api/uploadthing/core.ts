@@ -8,7 +8,9 @@ export const ourFileRouter = {
   imageUploader: f({ image: { maxFileSize: "4MB", maxFileCount: 5 } })
     .middleware(async () => {
       const session = await auth();
-      if (!session?.user?.id) throw new Error("Unauthorized");
+      if (!session || !session.user || !session.user.id) {
+        throw new Error("Unauthorized");
+      }
       return { userId: session.user.id };
     })
     .onUploadComplete(({ file }) => ({

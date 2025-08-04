@@ -1,11 +1,12 @@
 // middleware.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { auth } from "@/lib/auth";
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+  const token = await auth();
+  const authRequired = process.env.AUTH_REQUIRED === "true";
 
-  if (!token && req.nextUrl.pathname.startsWith("/create")) {
+  if (authRequired && !token && req.nextUrl.pathname.startsWith("/create")) {
     return NextResponse.redirect(new URL("/api/auth/signin", req.url));
   }
 }

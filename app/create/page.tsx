@@ -1,38 +1,28 @@
-"use server";
+"use client";
 
-import { revalidatePath } from "next/cache";
-import { PrismaClient } from "@prisma/client";
+import { useState } from "react";
+import { createListing } from "./action";
+import { Uploader } from "@/components/uploader";
 
-const prisma = new PrismaClient();
+export default function CreatePage() {
+  const [images, setImages] = useState<string[]>([]);
 
-export default async function CreatePage() {
-  async function create(formData: FormData) {
-    "use server";
-    await prisma.listing.create({
-  data: {
-    title: formData.get("title") as string,
-    description: formData.get("desc") as string,
-    price: Number(formData.get("price")),
-    surface: Number(formData.get("surface")),
-    rooms: Number(formData.get("rooms")),
-    address: formData.get("address") as string,
-    images: [], 
-    userId: "un-id-temporaire-en-attente-de-nextauth", // 🔥 TEMPORAIRE
-  },
-});
-    revalidatePath("/");
+  async function handleSubmit(formData: FormData) {
+    formData.set("images", JSON.stringify(images));
+    await createListing(formData);
   }
 
   return (
     <main className="p-8">
       <h1 className="text-2xl font-bold mb-4">Créer une annonce</h1>
-      <form action={create} className="flex flex-col gap-4 max-w-sm">
+      <form action={handleSubmit} className="flex flex-col gap-4 max-w-sm">
         <input name="title" placeholder="Titre" required />
         <textarea name="desc" placeholder="Description" required />
         <input name="price" type="number" placeholder="Prix / mois" required />
         <input name="surface" type="number" placeholder="Surface m²" required />
         <input name="rooms" type="number" placeholder="Pièces" required />
         <input name="address" placeholder="Adresse" required />
+        <Uploader value={images} onChange={setImages} />
         <button type="submit" className="bg-blue-600 text-white p-2 rounded">
           Publier
         </button>
