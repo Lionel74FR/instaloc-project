@@ -14,17 +14,37 @@ datasource db {
 }
 
 model Listing {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  price       Int      // centimes
-  surface     Int
-  rooms       Int
-  address     String
-  images      String[]
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
-  createdAt   DateTime @default(now())
+  id                String   @id @default(cuid())
+  title             String
+  description       String
+  price             Int      // centimes
+  surface           Int
+  rooms             Int
+  bedrooms          Int
+  bathrooms         Int
+  floor             Int?
+  elevator          Boolean?
+  address           String
+  zipCode           String
+  city              String
+  country           String
+  type              String
+  availabilityStart DateTime?
+  availabilityEnd   DateTime?
+  images            String[]
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade) 
+  createdAt         DateTime @default(now())
+}
+
+model Document {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  fileUrl    String
+  verified   Boolean  @default(false)
+  uploadedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -54,15 +74,18 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?   // 👈 pour les comptes classiques
-  accounts      Account[]
-  sessions      Session[]
-  listings      Listing[] // relation 1-n avec les annonces
+  id               String    @id @default(cuid())
+  name             String?
+  email            String    @unique
+  emailVerified    DateTime?
+  image            String?
+  password         String?   // 👈 pour les comptes classiques
+  accounts         Account[]
+  sessions         Session[]
+  listings         Listing[] // relation 1-n avec les annonces
+  documents        Document[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
 
 model VerificationToken {
@@ -71,4 +94,17 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Message {
+  id         String   @id @default(cuid())
+  senderId   String
+  receiverId String
+  content    String
+  sentAt     DateTime @default(now())
+
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@index([senderId, receiverId])
 }
