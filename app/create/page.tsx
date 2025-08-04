@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createListing } from "./action";
+import { createListing } from "./actions";
 import { Uploader } from "@/components/uploader";
 
 export default function CreatePage() {
