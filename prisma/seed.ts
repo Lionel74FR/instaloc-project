@@ -8,7 +8,7 @@ async function main() {
     data: {
       name: 'Lionel Test',
       email: 'lionel@example.com',
-      password: 'hashed-password', // à adapter avec ton système d’auth
+      password: 'hashed-password', 
     },
   });
 
