@@ -1,7 +1,35 @@
-// lib/auth.ts
-import { getServerSession } from "next-auth"; // OKOK
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+// lib/auth.ts — Lucia configuration (replaces NextAuth)
+import { Lucia } from "lucia";
+import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
+import { db } from "@/lib/db";
+import { cookies } from "next/headers";
 
-export const auth = async () => {
-  return await getServerSession(authOptions);
-};
+// NOTE: we use a dedicated Prisma model "UserSession" (see prisma/schema.prisma)
+export const lucia = new Lucia(
+  new PrismaAdapter(db.userSession, db.user),
+  {
+    sessionCookie: {
+      name: "session",
+      attributes: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+      },
+    },
+    getUserAttributes: (user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+    }),
+  }
+);
+
+export async function getCurrentUser() {
+  const sessionId = cookies().get(lucia.sessionCookieName)?.value;
+  if (!sessionId) return null;
+  const { user, session } = await lucia.validateSession(sessionId);
+  if (!session) return null;
+  return user;
+}

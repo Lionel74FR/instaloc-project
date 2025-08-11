@@ -7,11 +7,13 @@ async function main() {
   const hashedPassword = await bcrypt.hash('Test@1234', 12);
 
   // 1. Créer un utilisateur
-  const user = await prisma.user.create({
-    data: {
+  const user = await prisma.user.upsert({
+      where: { email: "test@example.com" },
+        update: {},
+      create: {
       firstName: 'Lionel',
       lastName: 'Test',
-      email: 'lionel@example.com',
+      email: 'test@example.com',
       password: hashedPassword,
     },
   });
@@ -31,9 +33,62 @@ async function main() {
       city: 'Annecy',
       country: 'France',
       type: 'Studio',
-      images: ['https://via.placeholder.com/300'],
+      images: ['https://images.unsplash.com/photo-1580587771525-78b9dba3b914'],
       userId: user.id,
     },
+  });
+
+  await prisma.listing.createMany({
+    data: [
+      {
+        title: 'Charmant T2 au bord du lac',
+        description: 'Appartement meublé avec vue sur le lac, proche du centre.',
+        price: 120000,
+        surface: 45,
+        rooms: 2,
+        bedrooms: 1,
+        bathrooms: 1,
+        address: '15 avenue du Petit Port',
+        zipCode: '74000',
+        city: 'Annecy',
+        country: 'France',
+        type: 'T2',
+        images: ['https://images.unsplash.com/photo-1600585154340-be6161a56a0c'],
+        userId: user.id,
+      },
+      {
+        title: 'Grand duplex lumineux',
+        description: 'Duplex meublé avec balcon et parking, quartier résidentiel.',
+        price: 150000,
+        surface: 80,
+        rooms: 3,
+        bedrooms: 2,
+        bathrooms: 2,
+        address: '8 chemin des Aravis',
+        zipCode: '74000',
+        city: 'Annecy',
+        country: 'France',
+        type: 'Duplex',
+        images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688'],
+        userId: user.id,
+      },
+      {
+        title: 'Studio cosy en vieille ville',
+        description: 'Studio rénové au cœur du centre historique, idéal bail mobilité.',
+        price: 85000,
+        surface: 20,
+        rooms: 1,
+        bedrooms: 0,
+        bathrooms: 1,
+        address: '3 rue Sainte-Claire',
+        zipCode: '74000',
+        city: 'Annecy',
+        country: 'France',
+        type: 'Studio',
+        images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2'],
+        userId: user.id,
+      },
+    ],
   });
 
   // 3. Créer un document

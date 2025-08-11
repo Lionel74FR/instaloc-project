@@ -1,45 +1,35 @@
-// app/api/auth/signin/route.ts
-import NextAuth, { NextAuthOptions } from "next-auth";
-import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials";
+// app/api/auth/signin/route.ts — Lucia email/password login
+import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
+import { lucia } from "@/lib/auth";
+import { cookies } from "next/headers";
 
-export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db),
-  providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID!,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-    }),
-    Credentials({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Mot de passe", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+export async function POST(req: Request) {
+  try {
+    const { email, password } = await req.json();
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-        });
-        if (!user) return null;
+    if (!email || !password) {
+      return NextResponse.json({ error: "Missing credentials" }, { status: 400 });
+    }
 
-        const valid = await bcrypt.compare(credentials.password, user.password!);
-        return valid ? user : null;
-      },
-    }),
-  ],
-  secret: process.env.AUTH_SECRET,
-  callbacks: {
-    session({ session, user }) {
-      return { ...session, user: { ...session.user, id: user.id } };
-    },
-  },
-};
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user || !user.password) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
 
-const handler = NextAuth(authOptions);
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
 
-export { handler as GET, handler as POST };
+    const session = await lucia.createSession(user.id, {});
+    const sessionCookie = lucia.createSessionCookie(session.id);
+    cookies().set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[SIGNIN_ERROR]", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
