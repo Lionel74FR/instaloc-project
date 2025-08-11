@@ -33,3 +33,12 @@ export async function getCurrentUser() {
   if (!session) return null;
   return user;
 }
+
+export async function validateRequest() {
+  const sessionId = cookies().get(lucia.sessionCookieName)?.value || null;
+  if (!sessionId) {
+    return { user: null, session: null };
+  }
+  const { user, session } = await lucia.validateSession(sessionId);
+  return { user, session };
+}
